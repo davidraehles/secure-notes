@@ -8,3 +8,5 @@
 ## Permissive CORS
 - **Vulnerability**: CORS configured to allow all origins allows any website to make requests to the API, increasing the risk of CSRF and other cross-origin attacks.
 - **Prevention**: Use restrictive CORS configurations that only allow trusted origins. Require ALLOWED_ORIGINS to be set in production.
+- **Parsing**: Robustly parse environment variables by splitting and trimming strings, filtering empty values to avoid configuration errors.
+- **Credentials**: Enable `credentials: true` when the application uses cookies or Authorization headers cross-origin.

@@ -12,16 +12,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-// 🛡️ Sentinel: Ensure ALLOWED_ORIGINS is set in production
+// Require ALLOWED_ORIGINS in production
 if (!process.env.ALLOWED_ORIGINS && (!process.env.NODE_ENV || process.env.NODE_ENV === 'production')) {
   throw new Error('ALLOWED_ORIGINS environment variable is required in production');
 }
 
-// 🛡️ Sentinel: Restrict CORS to specific origins for better security
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(origin => origin.length > 0)
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
-    : ['http://localhost:5173', 'http://localhost:3000'],
+  origin: allowedOrigins,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -39,4 +41,3 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
