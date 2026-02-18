@@ -52,6 +52,21 @@ export async function saveNoteToDB(note: Note): Promise<void> {
 }
 
 /**
+ * Save multiple notes to IndexedDB in a single transaction
+ * Optimization: Using a single transaction is much faster than multiple individual puts
+ */
+export async function saveNotesToDB(notes: Note[]): Promise<void> {
+  if (notes.length === 0) return;
+  const database = await initDB();
+  const tx = database.transaction('notes', 'readwrite');
+  const store = tx.objectStore('notes');
+  for (const note of notes) {
+    store.put(note);
+  }
+  await tx.done;
+}
+
+/**
  * Get all notes from IndexedDB
  */
 export async function getNotesFromDB(): Promise<Note[]> {

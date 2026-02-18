@@ -18,3 +18,7 @@ Centralizing the client in a shared module (e.g., `src/lib/prisma.ts`) ensures t
 ## Express 5 Type Casting
 
 When upgrading to or using Express 5, `req.params` values are typed more broadly (`string | string[]`). When these are passed directly to Prisma, it can cause TypeScript compilation errors. Explicitly casting these parameters to `string` (if they are expected to be single values) ensures compatibility with Prisma's strict typing for primary keys and filters.
+
+## IndexedDB Bulk Save
+
+Found a performance anti-pattern in IndexedDB usage where multiple notes are saved individually, creating N separate transactions instead of one. Also noticed that PBKDF2 is used per note with unique salts, which is secure but expensive during initial load. Implemented a bulk save function for IndexedDB to use a single transaction when loading multiple notes from the server.
