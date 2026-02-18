@@ -1,30 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
-}
-
-const prisma = globalThis.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.prisma = prisma;
-}
-
-const gracefulShutdown = async (signal: string) => {
-  try {
-    await prisma.$disconnect();
-  } catch (error) {
-    console.error(`Error disconnecting Prisma on ${signal}:`, error);
-  }
+const prismaClientSingleton = () => {
+  return new PrismaClient();
 };
 
-process.on('SIGINT', () => {
-  gracefulShutdown('SIGINT').finally(() => process.exit(0));
-});
+declare global {
+  var prismaGlobal: ReturnType<typeof prismaClientSingleton> | undefined;
+}
 
-process.on('SIGTERM', () => {
-  gracefulShutdown('SIGTERM').finally(() => process.exit(0));
-});
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
