@@ -9,7 +9,12 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// 🛡️ Sentinel: Ensure JWT_SECRET is set in environment, especially in production
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-fallback';
 
 export function authenticateToken(
   req: AuthRequest,
