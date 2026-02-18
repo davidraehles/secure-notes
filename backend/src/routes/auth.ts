@@ -3,7 +3,7 @@
  */
 
 import express from 'express';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 import { generateToken } from '../middleware/auth';
 
