@@ -44,14 +44,6 @@ export async function initDB(): Promise<IDBPDatabase<NotesDB>> {
 }
 
 /**
- * Save note to IndexedDB
- */
-export async function saveNoteToDB(note: Note): Promise<void> {
-  const database = await initDB();
-  await database.put('notes', note);
-}
-
-/**
  * Save multiple notes to IndexedDB in a single transaction
  * Optimization: Using a single transaction is much faster than multiple individual puts
  */
@@ -60,10 +52,20 @@ export async function saveNotesToDB(notes: Note[]): Promise<void> {
   const database = await initDB();
   const tx = database.transaction('notes', 'readwrite');
   const store = tx.objectStore('notes');
+  const putPromises: Promise<unknown>[] = [];
   for (const note of notes) {
-    store.put(note);
+    putPromises.push(store.put(note));
   }
+  await Promise.all(putPromises);
   await tx.done;
+}
+
+/**
+ * Save note to IndexedDB
+ */
+export async function saveNoteToDB(note: Note): Promise<void> {
+  const database = await initDB();
+  await database.put('notes', note);
 }
 
 /**
@@ -123,4 +125,3 @@ export async function clearSyncQueue(): Promise<void> {
   await tx.store.clear();
   await tx.done;
 }
-

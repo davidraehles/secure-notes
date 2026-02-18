@@ -83,8 +83,17 @@ export const loadNotesIntent = createAsyncThunk(
         })
       );
 
-      // Save to IndexedDB (optimized bulk save)
-      await saveNotesToDB(decryptedNotes);
+      // Save to IndexedDB in bulk with fallback to sequential save
+      try {
+        await saveNotesToDB(decryptedNotes);
+      } catch (error) {
+        console.error('Bulk save failed, falling back to sequential save:', error);
+        for (const note of decryptedNotes) {
+          await saveNoteToDB(note).catch((err) =>
+            console.error(`Failed to save note ${note.id} in fallback:`, err)
+          );
+        }
+      }
 
       dispatch(setNotes(decryptedNotes));
       dispatch(setLoading(false));
