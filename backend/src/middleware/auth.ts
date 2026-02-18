@@ -9,7 +9,13 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const secret = process.env.JWT_SECRET;
+
+if (!secret) {
+  throw new Error('JWT_SECRET environment variable is not set');
+}
+
+const JWT_SECRET: string = secret;
 
 export function authenticateToken(
   req: AuthRequest,

@@ -46,7 +46,7 @@ npm run dev
 1. Create a `.env` file in the `backend` directory:
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/secure_notes?schema=public"
-JWT_SECRET="your-secret-key-change-in-production"
+JWT_SECRET="your_jwt_secret_here"
 PORT=3000
 ```
 
@@ -116,7 +116,7 @@ railway up
 4. Set environment variables:
 ```bash
 railway variables set DATABASE_URL="your-postgres-url"
-railway variables set JWT_SECRET="your-secret-key"
+railway variables set JWT_SECRET="your_jwt_secret_here"
 railway variables set PORT=3000
 ```
 
