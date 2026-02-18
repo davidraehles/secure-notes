@@ -10,10 +10,8 @@ export interface AuthRequest extends Request {
 }
 
 // 🛡️ Sentinel: Ensure JWT_SECRET is set in environment, especially in production
-if (
-  !process.env.JWT_SECRET &&
-  (!process.env.NODE_ENV || process.env.NODE_ENV === 'production')
-) {
+// Treat undefined NODE_ENV as production for safety
+if (!process.env.JWT_SECRET && (!process.env.NODE_ENV || process.env.NODE_ENV === 'production')) {
   throw new Error('JWT_SECRET environment variable is required in production');
 }
 

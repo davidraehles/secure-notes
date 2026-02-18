@@ -11,15 +11,12 @@ import notesRoutes from './routes/notes';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 🛡️ Sentinel: Ensure ALLOWED_ORIGINS is set in production to prevent wide-open CORS
-if (
-  !process.env.ALLOWED_ORIGINS &&
-  (!process.env.NODE_ENV || process.env.NODE_ENV === 'production')
-) {
+// Middleware
+// 🛡️ Sentinel: Ensure ALLOWED_ORIGINS is set in production
+if (!process.env.ALLOWED_ORIGINS && (!process.env.NODE_ENV || process.env.NODE_ENV === 'production')) {
   throw new Error('ALLOWED_ORIGINS environment variable is required in production');
 }
 
-// Middleware
 // 🛡️ Sentinel: Restrict CORS to specific origins for better security
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS
