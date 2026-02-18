@@ -17,7 +17,12 @@ export function authenticateToken(
   next: NextFunction
 ) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  let token = authHeader && authHeader.split(' ')[1];
+
+  // Try to get token from cookie if not in header
+  if (!token && req.cookies) {
+    token = req.cookies.auth_token;
+  }
 
   if (!token) {
     return res.status(401).json({ message: 'Authentication required' });

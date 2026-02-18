@@ -12,20 +12,10 @@ class ApiClient {
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
-    // Load token from localStorage if available
-    const storedToken = localStorage.getItem('auth_token');
-    if (storedToken) {
-      this.token = storedToken;
-    }
   }
 
   setToken(token: string | null) {
     this.token = token;
-    if (token) {
-      localStorage.setItem('auth_token', token);
-    } else {
-      localStorage.removeItem('auth_token');
-    }
   }
 
   private async request<T>(
@@ -45,6 +35,7 @@ class ApiClient {
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -67,6 +58,16 @@ class ApiClient {
     return this.request<{ user: User; token: string }>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
+    });
+  }
+
+  async getMe(): Promise<{ user: User }> {
+    return this.request<{ user: User }>('/api/auth/me');
+  }
+
+  async logout(): Promise<void> {
+    return this.request<void>('/api/auth/logout', {
+      method: 'POST',
     });
   }
 
