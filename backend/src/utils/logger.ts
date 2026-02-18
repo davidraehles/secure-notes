@@ -1,19 +1,26 @@
 /**
- * Centralized logger utility
+ * Centralized logger utility wrapping console methods
  */
 
-export const info = (...args: unknown[]) => {
-  console.log(...args);
+export const info = (message: string, ...args: unknown[]) => {
+  console.log(message, ...args);
 };
 
-export const error = (...args: unknown[]) => {
-  console.error(...args);
+export const error = (message: string, ...args: unknown[]) => {
+  console.error(message, ...args);
 };
 
-export const warn = (...args: unknown[]) => {
-  console.warn(...args);
+export const warn = (message: string, ...args: unknown[]) => {
+  console.warn(message, ...args);
 };
 
-export const debug = (...args: unknown[]) => {
-  console.debug(...args);
+export const debug = (message: string, ...args: unknown[]) => {
+  console.debug(message, ...args);
+};
+
+export default {
+  info,
+  error,
+  warn,
+  debug,
 };

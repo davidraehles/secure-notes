@@ -23,8 +23,8 @@ router.get('/', async (req: AuthRequest, res) => {
     });
 
     res.json(notes);
-  } catch (err) {
-    logger.error('Get notes error:', err);
+  } catch (error) {
+    logger.error('Get notes error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -47,8 +47,8 @@ router.post('/', async (req: AuthRequest, res) => {
     });
 
     res.json(note);
-  } catch (err) {
-    logger.error('Create note error:', err);
+  } catch (error) {
+    logger.error('Create note error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -77,8 +77,8 @@ router.put('/:id', async (req: AuthRequest, res) => {
     });
 
     res.json(note);
-  } catch (err) {
-    logger.error('Update note error:', err);
+  } catch (error) {
+    logger.error('Update note error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -103,8 +103,8 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     });
 
     res.status(204).send();
-  } catch (err) {
-    logger.error('Delete note error:', err);
+  } catch (error) {
+    logger.error('Delete note error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
