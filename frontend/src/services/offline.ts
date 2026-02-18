@@ -49,12 +49,10 @@ export async function initDB(): Promise<IDBPDatabase<NotesDB>> {
 export async function saveNotesToDB(notes: Note[]): Promise<void> {
   const database = await initDB();
   const tx = database.transaction('notes', 'readwrite');
-  const putPromises: Promise<unknown>[] = [];
-  for (const note of notes) {
-    putPromises.push(tx.store.put(note));
-  }
-  await Promise.all(putPromises);
-  await tx.done;
+  await Promise.all([
+    ...notes.map((note) => tx.store.put(note)),
+    tx.done,
+  ]);
 }
 
 /**
