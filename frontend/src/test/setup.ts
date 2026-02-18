@@ -2,7 +2,7 @@
  * Test setup file for Vitest
  */
 
-import { expect, afterEach, vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 
 // Mock environment variables
 vi.stubEnv('VITE_API_URL', 'http://localhost:3000');
