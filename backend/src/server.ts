@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth';
 import notesRoutes from './routes/notes';
+import * as logger from './utils/logger';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,5 +40,5 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });

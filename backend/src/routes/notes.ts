@@ -5,6 +5,7 @@
 import express from 'express';
 import prisma from '../lib/prisma';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import * as logger from '../utils/logger';
 
 const router = express.Router();
 
@@ -22,8 +23,8 @@ router.get('/', async (req: AuthRequest, res) => {
     });
 
     res.json(notes);
-  } catch (error) {
-    console.error('Get notes error:', error);
+  } catch (err) {
+    logger.error('Get notes error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -46,8 +47,8 @@ router.post('/', async (req: AuthRequest, res) => {
     });
 
     res.json(note);
-  } catch (error) {
-    console.error('Create note error:', error);
+  } catch (err) {
+    logger.error('Create note error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -76,8 +77,8 @@ router.put('/:id', async (req: AuthRequest, res) => {
     });
 
     res.json(note);
-  } catch (error) {
-    console.error('Update note error:', error);
+  } catch (err) {
+    logger.error('Update note error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -102,8 +103,8 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     });
 
     res.status(204).send();
-  } catch (error) {
-    console.error('Delete note error:', error);
+  } catch (err) {
+    logger.error('Delete note error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
