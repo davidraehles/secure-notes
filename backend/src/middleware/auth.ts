@@ -9,13 +9,14 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-// 🛡️ Sentinel: Ensure JWT_SECRET is set in environment, especially in production
-// Treat undefined NODE_ENV as production for safety
-if (!process.env.JWT_SECRET && (!process.env.NODE_ENV || process.env.NODE_ENV === 'production')) {
-  throw new Error('JWT_SECRET environment variable is required in production');
+// Require JWT_SECRET in all environments — no hardcoded fallback
+const secret = process.env.JWT_SECRET;
+
+if (!secret) {
+  throw new Error('JWT_SECRET environment variable is not set');
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-fallback';
+const JWT_SECRET: string = secret;
 
 export function authenticateToken(
   req: AuthRequest,
@@ -46,4 +47,3 @@ export function authenticateToken(
 export function generateToken(userId: string): string {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 }
-
