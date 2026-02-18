@@ -43,6 +43,16 @@ export function NoteList() {
           key={note.id}
           className={`note-item ${currentNote?.id === note.id ? 'active' : ''}`}
           onClick={() => handleNoteClick(note)}
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleNoteClick(note);
+            }
+          }}
+          tabIndex={0}
+          aria-label={`Note: ${note.title || 'Untitled'}`}
+          aria-current={currentNote?.id === note.id ? 'true' : undefined}
         >
           <div className="note-title">{note.title || 'Untitled'}</div>
           <div className="note-preview">
@@ -55,6 +65,7 @@ export function NoteList() {
           <button
             className="delete-btn"
             onClick={(e) => handleDelete(e, note.id)}
+            aria-label={`Delete note: ${note.title || 'Untitled'}`}
           >
             Delete
           </button>

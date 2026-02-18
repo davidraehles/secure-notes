@@ -9,7 +9,14 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// Require JWT_SECRET in all environments — no hardcoded fallback
+const secret = process.env.JWT_SECRET;
+
+if (!secret) {
+  throw new Error('JWT_SECRET environment variable is not set');
+}
+
+const JWT_SECRET: string = secret;
 
 export function authenticateToken(
   req: AuthRequest,
@@ -17,7 +24,12 @@ export function authenticateToken(
   next: NextFunction
 ) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  let token = authHeader && authHeader.split(' ')[1];
+
+  // Try to get token from cookie if not in header
+  if (!token && req.cookies) {
+    token = req.cookies.auth_token;
+  }
 
   if (!token) {
     return res.status(401).json({ message: 'Authentication required' });
@@ -40,4 +52,3 @@ export function authenticateToken(
 export function generateToken(userId: string): string {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 }
-

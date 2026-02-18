@@ -2,7 +2,8 @@
  * Offline storage and sync service using IndexedDB
  */
 
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { openDB } from 'idb';
+import type { DBSchema, IDBPDatabase } from 'idb';
 import type { Note, SyncOperation } from '../models/types';
 
 interface NotesDB extends DBSchema {
@@ -41,6 +42,23 @@ export async function initDB(): Promise<IDBPDatabase<NotesDB>> {
   });
 
   return db;
+}
+
+/**
+ * Save multiple notes to IndexedDB in a single transaction
+ * Optimization: Using a single transaction is much faster than multiple individual puts
+ */
+export async function saveNotesToDB(notes: Note[]): Promise<void> {
+  if (notes.length === 0) return;
+  const database = await initDB();
+  const tx = database.transaction('notes', 'readwrite');
+  const store = tx.objectStore('notes');
+  const putPromises: Promise<unknown>[] = [];
+  for (const note of notes) {
+    putPromises.push(store.put(note));
+  }
+  await Promise.all(putPromises);
+  await tx.done;
 }
 
 /**
@@ -108,4 +126,3 @@ export async function clearSyncQueue(): Promise<void> {
   await tx.store.clear();
   await tx.done;
 }
-

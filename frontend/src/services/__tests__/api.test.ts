@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { apiClient } from '../api';
 
 // Mock fetch
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn() as unknown as typeof fetch;
 
 describe('API Client', () => {
   beforeEach(() => {
@@ -15,21 +15,14 @@ describe('API Client', () => {
     localStorage.clear();
   });
 
-  it('should set and get token', () => {
-    const token = 'test-token';
-    apiClient.setToken(token);
-    
-    expect(localStorage.getItem('auth_token')).toBe(token);
-  });
-
   it('should include token in authenticated requests', async () => {
     const token = 'test-token';
     apiClient.setToken(token);
     
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: '1', encryptedContent: 'encrypted' }),
-    });
+    } as Response);
 
     await apiClient.getNotes();
     
@@ -39,6 +32,7 @@ describe('API Client', () => {
         headers: expect.objectContaining({
           Authorization: `Bearer ${token}`,
         }),
+        credentials: 'include',
       })
     );
   });
@@ -49,10 +43,10 @@ describe('API Client', () => {
       token: 'test-token',
     };
 
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
-    });
+    } as Response);
 
     const result = await apiClient.register({
       email: 'test@example.com',
@@ -78,10 +72,10 @@ describe('API Client', () => {
       token: 'test-token',
     };
 
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
-    });
+    } as Response);
 
     const result = await apiClient.login({
       email: 'test@example.com',
@@ -91,12 +85,50 @@ describe('API Client', () => {
     expect(result).toEqual(mockResponse);
   });
 
+  it('should handle getMe', async () => {
+    const mockResponse = {
+      user: { id: '1', email: 'test@example.com' },
+    };
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockResponse,
+    } as Response);
+
+    const result = await apiClient.getMe();
+
+    expect(result).toEqual(mockResponse);
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/auth/me'),
+      expect.objectContaining({
+        credentials: 'include',
+      })
+    );
+  });
+
+  it('should handle logout', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ message: 'Logged out' }),
+    } as Response);
+
+    await apiClient.logout();
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/auth/logout'),
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+      })
+    );
+  });
+
   it('should handle errors', async () => {
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       status: 401,
       json: async () => ({ message: 'Unauthorized' }),
-    });
+    } as unknown as Response);
 
     await expect(apiClient.getNotes()).rejects.toThrow();
   });

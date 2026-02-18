@@ -9,7 +9,7 @@ import { store } from './store/store';
 import { Login } from './views/Login';
 import { NoteList } from './views/NoteList';
 import { NoteEditor } from './views/NoteEditor';
-import { logoutIntent } from './intents/authIntents';
+import { logoutIntent, checkAuthIntent } from './intents/authIntents';
 import { loadNotesIntent, initOnlineStatus, setUserPassword } from './intents/notesIntents';
 import { initDB } from './services/offline';
 import type { RootState, AppDispatch } from './store/store';
@@ -23,6 +23,9 @@ function AppContent() {
   useEffect(() => {
     // Initialize IndexedDB
     initDB();
+
+    // Check if user is already logged in via cookie
+    dispatch(checkAuthIntent());
 
     // Initialize online/offline listeners
     const cleanup = initOnlineStatus(dispatch);

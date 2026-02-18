@@ -3,11 +3,11 @@
  */
 
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import * as logger from '../utils/logger';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // All routes require authentication
 router.use(authenticateToken);
@@ -24,7 +24,7 @@ router.get('/', async (req: AuthRequest, res) => {
 
     res.json(notes);
   } catch (error) {
-    console.error('Get notes error:', error);
+    logger.error('Get notes error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -48,7 +48,7 @@ router.post('/', async (req: AuthRequest, res) => {
 
     res.json(note);
   } catch (error) {
-    console.error('Create note error:', error);
+    logger.error('Create note error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -57,7 +57,7 @@ router.post('/', async (req: AuthRequest, res) => {
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.userId!;
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { encryptedContent } = req.body;
 
     // Verify note belongs to user
@@ -78,7 +78,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 
     res.json(note);
   } catch (error) {
-    console.error('Update note error:', error);
+    logger.error('Update note error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -87,7 +87,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.userId!;
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     // Verify note belongs to user
     const existingNote = await prisma.note.findFirst({
@@ -104,7 +104,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
 
     res.status(204).send();
   } catch (error) {
-    console.error('Delete note error:', error);
+    logger.error('Delete note error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
