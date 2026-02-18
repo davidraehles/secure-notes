@@ -7,6 +7,7 @@ import { apiClient } from '../services/api';
 import { encrypt, decrypt } from '../services/encryption';
 import {
   saveNoteToDB,
+  saveNotesToDB,
   getNotesFromDB,
   deleteNoteFromDB,
   addToSyncQueue as addToSyncQueueDB,
@@ -82,10 +83,8 @@ export const loadNotesIntent = createAsyncThunk(
         })
       );
 
-      // Save to IndexedDB
-      for (const note of decryptedNotes) {
-        await saveNoteToDB(note);
-      }
+      // Save to IndexedDB in bulk
+      await saveNotesToDB(decryptedNotes);
 
       dispatch(setNotes(decryptedNotes));
       dispatch(setLoading(false));

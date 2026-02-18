@@ -44,6 +44,18 @@ export async function initDB(): Promise<IDBPDatabase<NotesDB>> {
 }
 
 /**
+ * Save multiple notes to IndexedDB in a single transaction
+ */
+export async function saveNotesToDB(notes: Note[]): Promise<void> {
+  const database = await initDB();
+  const tx = database.transaction('notes', 'readwrite');
+  for (const note of notes) {
+    tx.store.put(note);
+  }
+  await tx.done;
+}
+
+/**
  * Save note to IndexedDB
  */
 export async function saveNoteToDB(note: Note): Promise<void> {
