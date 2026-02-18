@@ -80,6 +80,14 @@ describe('authenticateToken middleware', () => {
     expect(next).toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
   });
+
+  it('should reject malformed authorization header without Bearer prefix', () => {
+    req.headers = { authorization: 'some-token-without-bearer' };
+    authenticateToken(req as AuthRequest, res as Response, next);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Authentication required' });
+    expect(next).not.toHaveBeenCalled();
+  });
 });
 
 describe('generateToken', () => {
@@ -91,5 +99,10 @@ describe('generateToken', () => {
 
     const decoded = jwt.decode(token) as any;
     expect(decoded.userId).toBe(userId);
+    expect(decoded.exp).toBeDefined();
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const sevenDaysInSeconds = 7 * 24 * 60 * 60;
+    expect(decoded.exp).toBeGreaterThanOrEqual(nowInSeconds + sevenDaysInSeconds - 10);
+    expect(decoded.exp).toBeLessThanOrEqual(nowInSeconds + sevenDaysInSeconds + 10);
   });
 });
