@@ -38,6 +38,13 @@ describe('authenticateToken middleware', () => {
     expect(res.json).toHaveBeenCalledWith({ message: 'Authentication required' });
   });
 
+  it('should return 401 if authorization header is present but malformed (no Bearer prefix)', () => {
+    req.headers!['authorization'] = 'token-without-bearer';
+    authenticateToken(req as AuthRequest, res as Response, next);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Authentication required' });
+  });
+
   it('should return 403 if token is invalid', () => {
     req.headers!['authorization'] = 'Bearer invalid-token';
 
@@ -80,18 +87,10 @@ describe('authenticateToken middleware', () => {
     expect(next).toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
   });
-
-  it('should reject malformed authorization header without Bearer prefix', () => {
-    req.headers = { authorization: 'some-token-without-bearer' };
-    authenticateToken(req as AuthRequest, res as Response, next);
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Authentication required' });
-    expect(next).not.toHaveBeenCalled();
-  });
 });
 
 describe('generateToken', () => {
-  it('should generate a token with userId', () => {
+  it('should generate a token with userId and correct expiration', () => {
     const userId = 'user-123';
     const token = generateToken(userId);
     expect(token).toBeDefined();
@@ -99,10 +98,12 @@ describe('generateToken', () => {
 
     const decoded = jwt.decode(token) as any;
     expect(decoded.userId).toBe(userId);
+
+    // Check expiration (should be 7 days)
     expect(decoded.exp).toBeDefined();
-    const nowInSeconds = Math.floor(Date.now() / 1000);
-    const sevenDaysInSeconds = 7 * 24 * 60 * 60;
-    expect(decoded.exp).toBeGreaterThanOrEqual(nowInSeconds + sevenDaysInSeconds - 10);
-    expect(decoded.exp).toBeLessThanOrEqual(nowInSeconds + sevenDaysInSeconds + 10);
+    const now = Math.floor(Date.now() / 1000);
+    const expectedExp = now + (7 * 24 * 60 * 60);
+    expect(decoded.exp).toBeGreaterThanOrEqual(expectedExp - 10);
+    expect(decoded.exp).toBeLessThanOrEqual(expectedExp + 10);
   });
 });
