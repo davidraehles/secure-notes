@@ -53,6 +53,7 @@ describe('Offline Service', () => {
     const notes = [mockNote, { ...mockNote, id: '2' }];
     await saveNotesToDB(notes);
 
+    expect(mockDb.transaction).toHaveBeenCalledTimes(1);
     expect(mockDb.transaction).toHaveBeenCalledWith('notes', 'readwrite');
     expect(mockTx.objectStore).toHaveBeenCalledWith('notes');
     expect(mockStore.put).toHaveBeenCalledTimes(2);

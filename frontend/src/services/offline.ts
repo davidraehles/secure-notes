@@ -61,7 +61,7 @@ export async function saveNotesToDB(notes: Note[]): Promise<void> {
   const tx = database.transaction('notes', 'readwrite');
   const store = tx.objectStore('notes');
   for (const note of notes) {
-    await store.put(note);
+    store.put(note);
   }
   await tx.done;
 }
