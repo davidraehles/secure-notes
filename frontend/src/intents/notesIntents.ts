@@ -83,8 +83,18 @@ export const loadNotesIntent = createAsyncThunk(
         })
       );
 
-      // Save to IndexedDB in bulk
-      await saveNotesToDB(decryptedNotes);
+      // Save to IndexedDB in bulk, with per-item fallback
+      try {
+        await saveNotesToDB(decryptedNotes);
+      } catch {
+        for (const note of decryptedNotes) {
+          try {
+            await saveNoteToDB(note);
+          } catch {
+            // Ignore individual failures for partial offline caching
+          }
+        }
+      }
 
       dispatch(setNotes(decryptedNotes));
       dispatch(setLoading(false));
