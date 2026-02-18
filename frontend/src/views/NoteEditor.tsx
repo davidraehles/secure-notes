@@ -2,12 +2,11 @@
  * Note editor view - MVI View layer
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentNote } from '../store/slices/notesSlice';
 import { createNoteIntent, updateNoteIntent } from '../intents/notesIntents';
 import type { AppDispatch, RootState } from '../store/store';
-import type { Note } from '../models/types';
 
 export function NoteEditor() {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,6 +14,7 @@ export function NoteEditor() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (currentNote) {
@@ -63,6 +63,10 @@ export function NoteEditor() {
     dispatch(setCurrentNote(null));
     setTitle('');
     setContent('');
+    // Focus title input when starting a new note
+    setTimeout(() => {
+      titleInputRef.current?.focus();
+    }, 0);
   };
 
   return (
@@ -74,15 +78,18 @@ export function NoteEditor() {
         </button>
       </div>
       <input
+        ref={titleInputRef}
         type="text"
         className="note-title-input"
         placeholder="Note title"
+        aria-label="Note title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <textarea
         className="note-content-input"
         placeholder="Write your note here..."
+        aria-label="Note content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
