@@ -6,6 +6,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { generateToken } from '../middleware/auth';
+import * as logger from '../utils/logger';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -50,7 +51,7 @@ router.post('/register', async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    logger.error('Registration error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -91,7 +92,7 @@ router.post('/login', async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
