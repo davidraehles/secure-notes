@@ -299,6 +299,11 @@ body {
   outline: none;
 }
 
+.note-title-input:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: -2px;
+}
+
 .note-content-input {
   flex: 1;
   padding: 20px;
@@ -312,6 +317,11 @@ body {
 
 .note-content-input:focus {
   outline: none;
+}
+
+.note-content-input:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: -2px;
 }
 
 /* Mobile responsive */

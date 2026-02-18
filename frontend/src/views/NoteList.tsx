@@ -44,13 +44,13 @@ export function NoteList() {
           className={`note-item ${currentNote?.id === note.id ? 'active' : ''}`}
           onClick={() => handleNoteClick(note)}
           onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               handleNoteClick(note);
             }
           }}
           tabIndex={0}
-          role="button"
           aria-label={`Note: ${note.title || 'Untitled'}`}
           aria-current={currentNote?.id === note.id ? 'true' : undefined}
         >
