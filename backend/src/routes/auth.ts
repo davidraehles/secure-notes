@@ -4,11 +4,10 @@
 
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { generateToken } from '../middleware/auth';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Register
 router.post('/register', async (req, res) => {
