@@ -5,6 +5,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth';
 import notesRoutes from './routes/notes';
 import * as logger from './utils/logger';
@@ -28,6 +29,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+app.use(cookieParser());
 app.use(express.json());
 
 // Routes

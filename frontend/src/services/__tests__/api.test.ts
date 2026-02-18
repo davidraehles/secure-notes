@@ -15,13 +15,6 @@ describe('API Client', () => {
     localStorage.clear();
   });
 
-  it('should set and get token', () => {
-    const token = 'test-token';
-    apiClient.setToken(token);
-    
-    expect(localStorage.getItem('auth_token')).toBe(token);
-  });
-
   it('should include token in authenticated requests', async () => {
     const token = 'test-token';
     apiClient.setToken(token);
@@ -39,6 +32,7 @@ describe('API Client', () => {
         headers: expect.objectContaining({
           Authorization: `Bearer ${token}`,
         }),
+        credentials: 'include',
       })
     );
   });
@@ -89,6 +83,44 @@ describe('API Client', () => {
     });
 
     expect(result).toEqual(mockResponse);
+  });
+
+  it('should handle getMe', async () => {
+    const mockResponse = {
+      user: { id: '1', email: 'test@example.com' },
+    };
+
+    (fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockResponse,
+    });
+
+    const result = await apiClient.getMe();
+
+    expect(result).toEqual(mockResponse);
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/auth/me'),
+      expect.objectContaining({
+        credentials: 'include',
+      })
+    );
+  });
+
+  it('should handle logout', async () => {
+    (fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ message: 'Logged out' }),
+    });
+
+    await apiClient.logout();
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/auth/logout'),
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+      })
+    );
   });
 
   it('should handle errors', async () => {

@@ -4,7 +4,6 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { apiClient } from '../services/api';
-import { hashPassword } from '../services/encryption';
 import type { LoginCredentials, RegisterCredentials } from '../models/types';
 import { setAuth, clearAuth } from '../store/slices/authSlice';
 
@@ -12,9 +11,6 @@ export const registerIntent = createAsyncThunk(
   'auth/register',
   async (credentials: RegisterCredentials, { dispatch, rejectWithValue }) => {
     try {
-      // Hash password client-side for verification
-      const passwordHash = await hashPassword(credentials.password);
-      
       // Register with backend (backend will hash again for storage)
       const result = await apiClient.register({
         email: credentials.email,
@@ -54,8 +50,33 @@ export const loginIntent = createAsyncThunk(
 export const logoutIntent = createAsyncThunk(
   'auth/logout',
   async (_, { dispatch }) => {
-    apiClient.setToken(null);
-    dispatch(clearAuth());
+    try {
+      await apiClient.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      apiClient.setToken(null);
+      dispatch(clearAuth());
+    }
+  }
+);
+
+export const checkAuthIntent = createAsyncThunk(
+  'auth/checkAuth',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const result = await apiClient.getMe();
+      // Even without a token in memory, the browser sends the cookie.
+      // We don't have the token string to put in Redux, but we have the user.
+      dispatch(setAuth({ user: result.user, token: '' }));
+      return result;
+    } catch (error) {
+      apiClient.setToken(null);
+      dispatch(clearAuth());
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Check auth failed'
+      );
+    }
   }
 );
 
