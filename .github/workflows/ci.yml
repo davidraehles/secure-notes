@@ -79,3 +79,27 @@ jobs:
       - name: Run tests
         working-directory: frontend
         run: npx vitest run
+
+  deploy:
+    name: Deploy to Production
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Backend to Railway
+        run: npx @railway/cli up --service backend --detach
+        working-directory: backend
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deploy Frontend to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: team_yBu0sX4aLxbTb8aWjyioS7Qf
+          vercel-project-id: prj_tgU2aRQuMN9y1NH7G5QXvDMweADn
+          working-directory: frontend
+          vercel-args: '--prod --yes'
