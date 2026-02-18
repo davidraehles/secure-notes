@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { apiClient } from '../api';
 
 // Mock fetch
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn() as unknown as typeof fetch;
 
 describe('API Client', () => {
   beforeEach(() => {
@@ -19,10 +19,10 @@ describe('API Client', () => {
     const token = 'test-token';
     apiClient.setToken(token);
     
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: '1', encryptedContent: 'encrypted' }),
-    });
+    } as Response);
 
     await apiClient.getNotes();
     
@@ -43,10 +43,10 @@ describe('API Client', () => {
       token: 'test-token',
     };
 
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
-    });
+    } as Response);
 
     const result = await apiClient.register({
       email: 'test@example.com',
@@ -72,10 +72,10 @@ describe('API Client', () => {
       token: 'test-token',
     };
 
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
-    });
+    } as Response);
 
     const result = await apiClient.login({
       email: 'test@example.com',
@@ -90,10 +90,10 @@ describe('API Client', () => {
       user: { id: '1', email: 'test@example.com' },
     };
 
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
-    });
+    } as Response);
 
     const result = await apiClient.getMe();
 
@@ -107,10 +107,10 @@ describe('API Client', () => {
   });
 
   it('should handle logout', async () => {
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ message: 'Logged out' }),
-    });
+    } as Response);
 
     await apiClient.logout();
 
@@ -124,11 +124,11 @@ describe('API Client', () => {
   });
 
   it('should handle errors', async () => {
-    (fetch as any).mockResolvedValueOnce({
+    vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       status: 401,
       json: async () => ({ message: 'Unauthorized' }),
-    });
+    } as unknown as Response);
 
     await expect(apiClient.getNotes()).rejects.toThrow();
   });

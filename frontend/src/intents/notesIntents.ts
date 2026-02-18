@@ -26,7 +26,7 @@ import {
   setOnline,
 } from '../store/slices/notesSlice';
 import type { Note, EncryptedNote } from '../models/types';
-import { RootState } from '../store/store';
+import type { RootState, AppDispatch } from '../store/store';
 
 // Get password from state (stored securely, not in Redux)
 let userPassword: string | null = null;
@@ -158,7 +158,7 @@ export const createNoteIntent = createAsyncThunk(
           
           await saveNoteToDB(updatedNote);
           dispatch(updateNote(updatedNote));
-        } catch (error) {
+        } catch {
           // Add to sync queue if online but request failed
           const syncOp = {
             id: crypto.randomUUID(),
@@ -217,7 +217,7 @@ export const updateNoteIntent = createAsyncThunk(
           // Encrypt and send to server
           const encryptedContent = await encrypt(JSON.stringify(updatedNote), password);
           await apiClient.updateNote(updatedNote.id, { encryptedContent });
-        } catch (error) {
+        } catch {
           // Add to sync queue
           const syncOp = {
             id: crypto.randomUUID(),
@@ -268,7 +268,7 @@ export const deleteNoteIntent = createAsyncThunk(
       if (isOnline) {
         try {
           await apiClient.deleteNote(noteId);
-        } catch (error) {
+        } catch {
           // Add to sync queue
           const syncOp = {
             id: crypto.randomUUID(),
@@ -348,7 +348,7 @@ export const syncQueueIntent = createAsyncThunk(
 /**
  * Initialize online/offline listeners
  */
-export function initOnlineStatus(dispatch: any) {
+export function initOnlineStatus(dispatch: AppDispatch) {
   const updateOnlineStatus = () => {
     dispatch(setOnline(navigator.onLine));
     if (navigator.onLine) {

@@ -40,7 +40,9 @@ describe('Offline Service', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(openDB).mockResolvedValue(mockDb as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockDb.transaction.mockReturnValue(mockTx as any);
   });
 

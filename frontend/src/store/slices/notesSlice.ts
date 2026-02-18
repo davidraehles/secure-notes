@@ -2,7 +2,8 @@
  * Notes slice - Redux Model layer for notes
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import type { NotesState, Note, SyncOperation } from '../../models/types';
 
 const initialState: NotesState = {
