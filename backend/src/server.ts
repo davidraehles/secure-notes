@@ -26,6 +26,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(origin => origin.length > 0)
   : ['http://localhost:5173', 'http://localhost:3000'];
 
+// Trust proxy for deployments behind reverse proxies (Railway, Vercel)
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
