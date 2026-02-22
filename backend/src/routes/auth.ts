@@ -10,9 +10,45 @@ import * as logger from '../utils/logger';
 
 const router = express.Router();
 
+// Get allowed origins from environment
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(origin => origin.length > 0)
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+/**
+ * CSRF protection: Validate that the request origin is in the allowed list
+ */
+function validateOrigin(req: express.Request, res: express.Response): boolean {
+  const origin = req.get('origin');
+  const referer = req.get('referer');
+
+  // Check if origin header is present and in allowed list
+  if (origin) {
+    return allowedOrigins.some(allowed => origin === allowed || origin.startsWith(allowed));
+  }
+
+  // Fallback to referer header if origin is not present
+  if (referer) {
+    return allowedOrigins.some(allowed => referer.startsWith(allowed));
+  }
+
+  // If neither header is present, reject cross-origin requests in production
+  if (process.env.NODE_ENV === 'production') {
+    return false;
+  }
+
+  // Allow requests without origin/referer headers in development
+  return true;
+}
+
 // Register
 router.post('/register', async (req, res) => {
   try {
+    // CSRF protection: Validate origin
+    if (!validateOrigin(req, res)) {
+      return res.status(403).json({ message: 'CSRF validation failed' });
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -45,7 +81,7 @@ router.post('/register', async (req, res) => {
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
     });
@@ -66,6 +102,11 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
+    // CSRF protection: Validate origin
+    if (!validateOrigin(req, res)) {
+      return res.status(403).json({ message: 'CSRF validation failed' });
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -94,7 +135,7 @@ router.post('/login', async (req, res) => {
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
     });
@@ -137,7 +178,17 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
 
 // Logout
 router.post('/logout', (req, res) => {
-  res.clearCookie('auth_token');
+  // CSRF protection: Validate origin
+  if (!validateOrigin(req, res)) {
+    return res.status(403).json({ message: 'CSRF validation failed' });
+  }
+
+  res.clearCookie('auth_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/',
+  });
   res.json({ message: 'Logged out successfully' });
 });
 
