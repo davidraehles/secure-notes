@@ -13,6 +13,9 @@ import * as logger from './utils/logger';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for secure cookies behind reverse proxies (like Railway)
+app.set('trust proxy', 1);
+
 // Middleware
 // Require ALLOWED_ORIGINS in production
 if (!process.env.ALLOWED_ORIGINS && (!process.env.NODE_ENV || process.env.NODE_ENV === 'production')) {
@@ -22,6 +25,9 @@ if (!process.env.ALLOWED_ORIGINS && (!process.env.NODE_ENV || process.env.NODE_E
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(origin => origin.length > 0)
   : ['http://localhost:5173', 'http://localhost:3000'];
+
+// Trust proxy for deployments behind reverse proxies (Railway, Vercel)
+app.set('trust proxy', 1);
 
 app.use(cors({
   origin: allowedOrigins,
